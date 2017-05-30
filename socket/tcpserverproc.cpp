@@ -10,6 +10,7 @@ TcpServerProc::TcpServerProc(int socketDescriptor, RecvCallback pCallback, QObje
     if (!tcpSocket.setSocketDescriptor(socketDescriptor))
     {
         emit error(tcpSocket.error());
+        recvCallback(RECV_ERROR, nullptr, 0, 0, nullptr);
         return;
     }
 

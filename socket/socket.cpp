@@ -7,8 +7,8 @@
 int _argc = 1;
 QSharedPointer<QApplication> app(new QApplication(_argc, nullptr));
 
-QHash<int, QSharedPointer<QObject>> g_hashSockets;
-QSharedPointer<QObject> FindSocket(int nId);
+QHash<int, QPair<QSharedPointer<QObject>, int>> g_hashSockets;
+QObject* FindSocket(int nId);
 
 int InitSocket(int nID, int nType, const char* szIniPath, RecvCallback pCallback)
 {
@@ -23,8 +23,8 @@ int InitSocket(int nID, int nType, const char* szIniPath, RecvCallback pCallback
     switch (nType)
     {
     case TCP_SERVER:
-        g_hashSockets.insert(nID, QSharedPointer<QObject>(new TcpServer(pCallback)));
-        pServer = (TcpServer*)g_hashSockets[nID].data();
+        g_hashSockets.insert(nID, qMakePair(QSharedPointer<QObject>(new TcpServer(pCallback)), nType));
+        pServer = (TcpServer*)g_hashSockets[nID].first.data();
         section = QString().sprintf("TcpServer%d", nID);
         pServer->listen(QHostAddress(config.GetValue(section, "Address", "127.0.0.1").toString()),
                         config.GetValue(section, "Port", 9999).toInt());
@@ -35,17 +35,12 @@ int InitSocket(int nID, int nType, const char* szIniPath, RecvCallback pCallback
     return 0;
 }
 
-void UninitSocket(int nID)
-{
 
-}
-
-
-QSharedPointer<QObject> FindSocket(int nId)
+QObject *FindSocket(int nId)
 {
     if (g_hashSockets.contains(nId))
     {
-        return g_hashSockets[nId];
+        return g_hashSockets[nId].first.data();
     }
     else
     {
