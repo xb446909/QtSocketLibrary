@@ -18,7 +18,7 @@ QVariant IniConfig::GetValue(QString section, QString key, QVariant defaultValue
 {
     beginGroup(section);
     QVariant val = value(key, defaultValue);
-    SetValue(section, key, val);
     endGroup();
+    SetValue(section, key, val);
     return val;
 }
