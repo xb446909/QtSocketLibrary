@@ -1,5 +1,4 @@
 #include "tcpserver.h"
-#include "tcpserverthread.h"
 
 TcpServer::TcpServer(RecvCallback pCallback, QObject *parent)
     : QTcpServer(parent)
@@ -8,9 +7,26 @@ TcpServer::TcpServer(RecvCallback pCallback, QObject *parent)
 
 }
 
+TcpServer::~TcpServer()
+{
+    foreach (TcpServerProc* proc, procList)
+    {
+        delete proc;
+    }
+}
+
 void TcpServer::incomingConnection(qintptr socketDescriptor)
 {
-    TcpServerThread *thread = new TcpServerThread(socketDescriptor, recvCallback, this);
-    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-    thread->start();
+    TcpServerProc* proc = new TcpServerProc(socketDescriptor, recvCallback, this);
+    procList.append(proc);
+}
+
+void TcpServer::getNewConnection(QTcpSocket* sock)
+{
+    clientList.append(sock);
+}
+
+void TcpServer::removeConnection(QTcpSocket* sock)
+{
+    clientList.removeAll(sock);
 }

@@ -3,21 +3,27 @@
 
 #include <QTcpServer>
 #include "socketlibrary.h"
+#include "tcpserverproc.h"
 
 class TcpServer : public QTcpServer
 {
     Q_OBJECT
 public:
     TcpServer(RecvCallback pCallback, QObject *parent = 0);
+    ~TcpServer();
 
-signals:
-    void Send();
+public slots:
+    void getNewConnection(QTcpSocket* sock);
+    void removeConnection(QTcpSocket* sock);
+
 
 protected:
     void incomingConnection(qintptr socketDescriptor) override;
 
 private:
     RecvCallback recvCallback;
+    QList<QTcpSocket*> clientList;
+    QList<TcpServerProc*> procList;
 };
 
 #endif // TCPSERVER_H

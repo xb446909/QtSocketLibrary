@@ -13,10 +13,11 @@ QSharedPointer<QObject> FindSocket(int nId);
 int InitSocket(int nID, int nType, const char* szIniPath, RecvCallback pCallback)
 {
     qDebug() << __FUNCTION__;
+
     g_hashSockets.remove(nID);
+
     IniConfig config(szIniPath);
     QString section;
-
     TcpServer* pServer;
 
     switch (nType)
