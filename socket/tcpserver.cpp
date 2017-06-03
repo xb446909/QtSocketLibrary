@@ -9,6 +9,7 @@ TcpServer::TcpServer(RecvCallback pCallback, QObject *parent)
 
 TcpServer::~TcpServer()
 {
+    qDebug() << __FUNCTION__;
     foreach (TcpServerProc* proc, procList)
     {
         delete proc;

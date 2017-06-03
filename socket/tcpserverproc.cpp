@@ -1,6 +1,5 @@
 #include "tcpserverproc.h"
 #include "tcpserver.h"
-#include <QTextCodec>
 
 TcpServerProc::TcpServerProc(int socketDescriptor, RecvCallback pCallback, QObject *parent)
     : QObject(parent)
@@ -25,7 +24,6 @@ TcpServerProc::TcpServerProc(int socketDescriptor, RecvCallback pCallback, QObje
                      tcpSocket.peerPort(), 0, nullptr);
 }
 
-
 void TcpServerProc::readData()
 {
     QByteArray recvBytes = tcpSocket.readAll();
@@ -40,3 +38,4 @@ void TcpServerProc::socketDisconnect()
                  tcpSocket.peerPort(), 0, nullptr);
     emit disconncted(&tcpSocket);
 }
+

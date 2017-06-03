@@ -1,14 +1,21 @@
 #include "socket.h"
 #include <QHash>
-#include <QApplication>
+#include <QCoreApplication>
 #include "iniconfig.h"
 #include "tcpserver.h"
 
 int _argc = 1;
-QSharedPointer<QApplication> app(new QApplication(_argc, nullptr));
+QSharedPointer<QCoreApplication> app(new QCoreApplication(_argc, nullptr));
 
 QHash<int, QPair<QSharedPointer<QObject>, int>> g_hashSockets;
 QObject* FindSocket(int nId);
+
+void DeleteTcpServer(QObject* pObj)
+{
+    TcpServer* pServer = (TcpServer*)pObj;
+    pServer->close();
+    pObj->deleteLater();
+}
 
 int InitSocket(int nID, int nType, const char* szIniPath, RecvCallback pCallback)
 {
@@ -23,7 +30,7 @@ int InitSocket(int nID, int nType, const char* szIniPath, RecvCallback pCallback
     switch (nType)
     {
     case TCP_SERVER:
-        g_hashSockets.insert(nID, qMakePair(QSharedPointer<QObject>(new TcpServer(pCallback)), nType));
+        g_hashSockets.insert(nID, qMakePair(QSharedPointer<QObject>(new TcpServer(pCallback), DeleteTcpServer), nType));
         pServer = (TcpServer*)g_hashSockets[nID].first.data();
         section = QString().sprintf("TcpServer%d", nID);
         pServer->listen(QHostAddress(config.GetValue(section, "Address", "127.0.0.1").toString()),

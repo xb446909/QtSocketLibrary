@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += network widgets
+QT       += network
 QT       -= gui
 
 TARGET = socket
