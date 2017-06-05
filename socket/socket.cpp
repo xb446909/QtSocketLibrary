@@ -8,7 +8,7 @@ int _argc = 1;
 QSharedPointer<QCoreApplication> app(new QCoreApplication(_argc, nullptr));
 
 QHash<int, QPair<QSharedPointer<QObject>, int>> g_hashSockets;
-QObject* FindSocket(int nId);
+QPair<QSharedPointer<QObject>, int> FindSocket(int nId);
 
 void DeleteTcpServer(QObject* pObj)
 {
@@ -42,15 +42,38 @@ int InitSocket(int nID, int nType, const char* szIniPath, RecvCallback pCallback
     return 0;
 }
 
+int TCPSend(int nID, const char* szSendBuf, const char* szDstIP, int nDstPort)
+{
+    QPair<QSharedPointer<QObject>, int> socket = FindSocket(nID);
+    TcpServer* pServer = nullptr;
+    QTcpSocket* pSocket = nullptr;
+    if (socket.first.data() != nullptr)
+    {
+        switch (socket.second) {
+        case TCP_SERVER:
+            pServer = (TcpServer*)socket.first.data();
+            pSocket = pServer->getSocket(szDstIP, nDstPort);
+            if (pSocket == nullptr)
+                return -1;
+            else
+                pSocket->write(szSendBuf, strlen(szSendBuf) + 1);
+            break;
+        default:
+            break;
+        }
+    }
+    return 0;
+}
 
-QObject *FindSocket(int nId)
+
+QPair<QSharedPointer<QObject>, int> FindSocket(int nId)
 {
     if (g_hashSockets.contains(nId))
     {
-        return g_hashSockets[nId].first.data();
+        return g_hashSockets[nId];
     }
     else
     {
-        return nullptr;
+        return QPair<QSharedPointer<QObject>, int>();
     }
 }

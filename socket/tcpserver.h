@@ -12,6 +12,8 @@ public:
     TcpServer(RecvCallback pCallback, QObject *parent = 0);
     ~TcpServer();
 
+    QTcpSocket* getSocket(const char* szIP, int nPort);
+
 public slots:
     void getNewConnection(QTcpSocket* sock);
     void removeConnection(QTcpSocket* sock);

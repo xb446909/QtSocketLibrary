@@ -9,7 +9,6 @@ TcpServer::TcpServer(RecvCallback pCallback, QObject *parent)
 
 TcpServer::~TcpServer()
 {
-    qDebug() << __FUNCTION__;
     foreach (TcpServerProc* proc, procList)
     {
         delete proc;
@@ -30,4 +29,15 @@ void TcpServer::getNewConnection(QTcpSocket* sock)
 void TcpServer::removeConnection(QTcpSocket* sock)
 {
     clientList.removeAll(sock);
+}
+
+QTcpSocket* TcpServer::getSocket(const char* szIP, int nPort)
+{
+    foreach (QTcpSocket* socket, clientList)
+    {
+        if ((socket->peerAddress().toString().compare(szIP, Qt::CaseInsensitive) == 0)
+                && (socket->peerPort() == nPort))
+            return socket;
+    }
+    return nullptr;
 }

@@ -18,7 +18,7 @@ TcpServerProc::TcpServerProc(int socketDescriptor, RecvCallback pCallback, QObje
     connect(&tcpSocket, SIGNAL(disconnected()), this, SLOT(socketDisconnect()));
     connect(this, SIGNAL(newConnection(QTcpSocket*)), pServer, SLOT(getNewConnection(QTcpSocket*)));
     connect(this, SIGNAL(disconncted(QTcpSocket*)), pServer, SLOT(removeConnection(QTcpSocket*)));
-
+    emit newConnection(&tcpSocket);
     if ((recvCallback != nullptr) && tcpSocket.state() == QTcpSocket::ConnectedState)
         recvCallback(RECV_SOCKET, tcpSocket.peerAddress().toString().toStdString().c_str(),
                      tcpSocket.peerPort(), 0, nullptr);
