@@ -3,8 +3,7 @@
 
 #define TCP_SERVER		0
 #define TCP_CLIENT		1
-#define UDP_SERVER		2
-#define UDP_CLIENT		3
+#define UDP             2
 
 #define RECV_ERROR		0
 #define RECV_CLOSE		1
@@ -25,5 +24,7 @@ typedef int(*fTCPSend)(int nID, const char* szSendBuf, const char* szDstIP, int 
                                                                                             //client的地址为addr
                                                                                             //client发送给sever时，IP和port为空
 typedef int(*fTCPRecv)(int nID, char* szRecvBuf, int nBufLen, int nTimeoutMs);
+typedef int(*fUDPSend)(int nID, const char* szSendBuf, const char* szDstIP, int nDstPort);
+typedef int(*fUDPRecv)(int nID, char* szRecvBuf, int nBufLen, int nTimeoutMs, char* szDstIP, int* pnDstPort);
 
 #endif // SOCKETLIBRARY_H

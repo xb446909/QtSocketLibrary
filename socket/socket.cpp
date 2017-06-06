@@ -3,6 +3,8 @@
 #include <QCoreApplication>
 #include "iniconfig.h"
 #include "tcpserver.h"
+#include "udpproc.h"
+#include <sys/time.h>
 
 typedef struct _tagSocketParam
 {
@@ -30,7 +32,7 @@ int InitSocket(int nID, int nType, const char* szIniPath, RecvCallback pCallback
     IniConfig config(szIniPath);
     QString section;
     TcpServer* pServer;
-
+    UdpProc* pUdpProc;
     g_hashSockets.remove(nID);
     g_hashSockets.insert(nID, QSharedPointer<SocketParam>(new SocketParam()));
     g_hashSockets[nID]->nType = nType;
@@ -48,7 +50,16 @@ int InitSocket(int nID, int nType, const char* szIniPath, RecvCallback pCallback
     case TCP_CLIENT:
         g_hashSockets[nID]->pObj = new QTcpSocket();
         break;
+    case UDP:
+        pUdpProc = new UdpProc(pCallback);
+        g_hashSockets[nID]->pObj = pUdpProc;
+        section = QString().sprintf("UDP%d", nID);
+        pUdpProc->bind(QHostAddress(config.GetValue(section, "Address", "127.0.0.1").toString()),
+                       config.GetValue(section, "Port", 9999).toInt());
+        break;
     default:
+        qDebug() << "Error socket type";
+        return -1;
         break;
     }
     return 0;
@@ -59,7 +70,8 @@ int TCPSend(int nID, const char* szSendBuf, const char* szDstIP, int nDstPort)
     pSocketParam socket = FindSocket(nID);
     TcpServer* pServer = nullptr;
     QTcpSocket* pSocket = nullptr;
-    QAbstractSocket* pSendSocket;
+    QAbstractSocket* pSendSocket = nullptr;
+
     if (socket != nullptr)
     {
         switch (socket->nType) {
@@ -93,6 +105,59 @@ int TCPSend(int nID, const char* szSendBuf, const char* szDstIP, int nDstPort)
             return -1;
             break;
         }
+    }
+    return 0;
+}
+
+int UDPSend(int nID, const char* szSendBuf, const char* szDstIP, int nDstPort)
+{
+    pSocketParam socket = FindSocket(nID);
+    if ((socket == nullptr) | (socket->nType != UDP))
+    {
+        qDebug() << "Error socket type";
+        return -1;
+    }
+    UdpProc* pUdpProc = (UdpProc*)socket->pObj;
+    if (pUdpProc == nullptr)
+        return -1;
+    else
+    {
+        pUdpProc->writeDatagram(szSendBuf, strlen(szSendBuf) + 1,
+                                QHostAddress(QString(szDstIP)), nDstPort);
+    }
+    return 0;
+}
+
+int UDPRecv(int nID, char* szRecvBuf, int nBufLen, int nTimeoutMs, char* szDstIP, int* pnDstPort)
+{
+    pSocketParam pParam = FindSocket(nID);
+    if ((pParam == nullptr) | (pParam->nType != UDP))
+    {
+        qDebug() << "Error socket type";
+        return -1;
+    }
+    UdpProc* pUdpProc = (UdpProc*)pParam->pObj;
+
+    clock_t startTime = clock();
+    clock_t endTime = clock();
+    while (!pUdpProc->hasPendingDatagrams())
+    {
+        endTime = clock();
+        if (endTime - startTime > nTimeoutMs)
+        {
+            qDebug() << "Receive time out";
+            return -1;
+        }
+    }
+
+    while (pUdpProc->hasPendingDatagrams())
+    {
+        QHostAddress sender;
+        quint16 senderPort;
+        pUdpProc->readDatagram(szRecvBuf, nBufLen,
+                               &sender, &senderPort);
+        strcpy(szDstIP, sender.toString().toStdString().c_str());
+        *pnDstPort = senderPort;
     }
     return 0;
 }

@@ -26,14 +26,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += socket.cpp \
     tcpserver.cpp \
     iniconfig.cpp \
-    tcpserverproc.cpp
+    tcpserverproc.cpp \
+    udpproc.cpp
 
 HEADERS += socket.h\
         socket_global.h \
     socketlibrary.h \
     tcpserver.h \
     iniconfig.h \
-    tcpserverproc.h
+    tcpserverproc.h \
+    udpproc.h
 
 unix {
     target.path = /usr/lib
