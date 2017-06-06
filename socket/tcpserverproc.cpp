@@ -9,7 +9,8 @@ TcpServerProc::TcpServerProc(int socketDescriptor, RecvCallback pCallback, QObje
     if (!tcpSocket.setSocketDescriptor(socketDescriptor))
     {
         emit error(tcpSocket.error());
-        recvCallback(RECV_ERROR, nullptr, 0, 0, nullptr);
+        if (recvCallback != nullptr)
+            recvCallback(RECV_ERROR, nullptr, 0, 0, nullptr);
         return;
     }
 
@@ -27,15 +28,17 @@ TcpServerProc::TcpServerProc(int socketDescriptor, RecvCallback pCallback, QObje
 void TcpServerProc::readData()
 {
     QByteArray recvBytes = tcpSocket.readAll();
-    recvCallback(RECV_DATA, tcpSocket.peerAddress().toString().toStdString().c_str(),
-                 tcpSocket.peerPort(), recvBytes.size(), recvBytes.data());
+    if (recvCallback != nullptr)
+        recvCallback(RECV_DATA, tcpSocket.peerAddress().toString().toStdString().c_str(),
+                     tcpSocket.peerPort(), recvBytes.size(), recvBytes.data());
 }
 
 
 void TcpServerProc::socketDisconnect()
 {
-    recvCallback(RECV_CLOSE, tcpSocket.peerAddress().toString().toStdString().c_str(),
-                 tcpSocket.peerPort(), 0, nullptr);
+    if (recvCallback != nullptr)
+        recvCallback(RECV_CLOSE, tcpSocket.peerAddress().toString().toStdString().c_str(),
+                     tcpSocket.peerPort(), 0, nullptr);
     emit disconncted(&tcpSocket);
 }
 

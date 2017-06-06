@@ -19,8 +19,9 @@ void UdpProc::readPendingDatagrams()
 
         readDatagram(datagram.data(), datagram.size(),
                      &sender, &senderPort);
-        recvCallBack(RECV_DATA, sender.toString().toStdString().c_str(),
-                     senderPort, datagram.size(), datagram.data());
+        if (recvCallBack != nullptr)
+            recvCallBack(RECV_DATA, sender.toString().toStdString().c_str(),
+                         senderPort, datagram.size(), datagram.data());
 
     }
 }
