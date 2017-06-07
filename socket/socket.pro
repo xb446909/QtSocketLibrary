@@ -27,7 +27,8 @@ SOURCES += socket.cpp \
     tcpserver.cpp \
     iniconfig.cpp \
     tcpserverproc.cpp \
-    udpproc.cpp
+    udpproc.cpp \
+    tcpclientproc.cpp
 
 HEADERS += socket.h\
         socket_global.h \
@@ -35,11 +36,12 @@ HEADERS += socket.h\
     tcpserver.h \
     iniconfig.h \
     tcpserverproc.h \
-    udpproc.h
+    udpproc.h \
+    tcpclientproc.h
 
 unix {
     target.path = /usr/lib
     INSTALLS += target
 }
 
-DEFINES += USE_IN_QT_APP
+#DEFINES += USE_IN_QT_APP

@@ -4,6 +4,7 @@
 #include "iniconfig.h"
 #include "tcpserver.h"
 #include "udpproc.h"
+#include "tcpclientproc.h"
 #include <sys/time.h>
 
 typedef struct _tagSocketParam
@@ -50,7 +51,7 @@ int InitSocket(int nID, int nType, const char* szIniPath, RecvCallback pCallback
                         config.GetValue(section, "Port", 9999).toInt());
         break;
     case TCP_CLIENT:
-        g_hashSockets[nID]->pObj = new QTcpSocket();
+        g_hashSockets[nID]->pObj = new TcpClientProc(pCallback);
         break;
     case UDP:
         pUdpProc = new UdpProc(pCallback);
@@ -97,7 +98,10 @@ int TCPSend(int nID, const char* szSendBuf, const char* szDstIP, int nDstPort)
             else
             {
                 if (pSendSocket->state() == QAbstractSocket::ConnectedState)
+                {
                     pSendSocket->write(szSendBuf, strlen(szSendBuf) + 1);
+                    pSendSocket->waitForBytesWritten();
+                }
                 else
                     qDebug() << "Socket is disconnected";
             }
