@@ -42,4 +42,4 @@ unix {
     INSTALLS += target
 }
 
-FORMS +=
+DEFINES += USE_IN_QT_APP

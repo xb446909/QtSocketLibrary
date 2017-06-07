@@ -18,8 +18,10 @@ typedef struct _tagSocketParam
     }
 }SocketParam, *pSocketParam;
 
+#ifndef USE_IN_QT_APP
 int _argc = 1;
 QSharedPointer<QCoreApplication> app(new QCoreApplication(_argc, nullptr));
+#endif
 
 QHash<int, QSharedPointer<SocketParam>> g_hashSockets;
 pSocketParam FindSocket(int nId);
