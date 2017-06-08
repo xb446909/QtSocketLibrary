@@ -15,7 +15,7 @@ typedef struct _tagSocketParam
 
     ~_tagSocketParam()
     {
-        pObj->deleteLater();
+        delete pObj;
     }
 }SocketParam, *pSocketParam;
 
@@ -225,4 +225,9 @@ int TCPRecv(int nID, char* szRecvBuf, int nBufLen, int nTimeoutMs)
         qDebug() << "read time timeout";
         return -1;
     }
+}
+
+void UninitSocket(int nID)
+{
+    g_hashSockets.remove(nID);
 }
