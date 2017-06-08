@@ -1,7 +1,6 @@
 #ifndef SOCKET_H
 #define SOCKET_H
 
-#include "socket_global.h"
 #include "socketlibrary.h"
 
 extern "C" int InitSocket(int nID, int nType, const char* szIniPath = nullptr, RecvCallback pCallback = nullptr);

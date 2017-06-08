@@ -31,7 +31,6 @@ SOURCES += socket.cpp \
     tcpclientproc.cpp
 
 HEADERS += socket.h\
-        socket_global.h \
     socketlibrary.h \
     tcpserver.h \
     iniconfig.h \
