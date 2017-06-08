@@ -27,10 +27,12 @@ TcpServerProc::TcpServerProc(int socketDescriptor, RecvCallback pCallback, QObje
 
 void TcpServerProc::readData()
 {
-    QByteArray recvBytes = tcpSocket.readAll();
     if (recvCallback != nullptr)
+    {
+        QByteArray recvBytes = tcpSocket.readAll();
         recvCallback(RECV_DATA, tcpSocket.peerAddress().toString().toStdString().c_str(),
                      tcpSocket.peerPort(), recvBytes.size(), recvBytes.data());
+    }
 }
 
 

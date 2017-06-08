@@ -204,15 +204,25 @@ int TCPConnect(int nID, int nTimeoutMs)
     }
 }
 
-int TCPRecv(int nID, char* szRecvBuf, int nBufLen, int nTimeoutMs)
+int TCPRecv(int nID, char* szRecvBuf, int nBufLen, int nTimeoutMs, const char *szDstIP, int nDstPort)
 {
     pSocketParam pParam = FindSocket(nID);
-    if (pParam->nType != TCP_CLIENT)
+    QTcpSocket* pSocket = nullptr;
+    TcpServer* pServer = nullptr;
+    if (pParam->nType == TCP_CLIENT)
     {
-        qDebug() << "Error in socket type";
+        pSocket = (QTcpSocket*)pParam->pObj;
+    }
+    else if (pParam->nType == TCP_SERVER)
+    {
+        pServer = (TcpServer*)pParam->pObj;
+        pSocket = pServer->getSocket(szDstIP, nDstPort);
+    }
+    if ((pSocket == nullptr) || (pSocket->state() == QTcpSocket::UnconnectedState))
+    {
+        qDebug() << "can not find the socket or the socket is unconnected";
         return -1;
     }
-    QTcpSocket* pSocket = (QTcpSocket*)pParam->pObj;
     if (pSocket->waitForReadyRead(nTimeoutMs))
     {
         QByteArray bytes = pSocket->readAll();

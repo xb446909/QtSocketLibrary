@@ -10,10 +10,12 @@ TcpClientProc::TcpClientProc(RecvCallback pCallback, QObject *parent)
 
 void TcpClientProc::readData()
 {
-    QByteArray recvBytes = readAll();
     if (recvCallBack != nullptr)
+    {
+        QByteArray recvBytes = readAll();
         recvCallBack(RECV_DATA, peerAddress().toString().toStdString().c_str(),
                      peerPort(), recvBytes.size(), recvBytes.data());
+    }
 }
 
 void TcpClientProc::serverDisconnected()

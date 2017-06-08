@@ -10,7 +10,7 @@ UdpProc::UdpProc(RecvCallback pCallback, QObject *parent)
 
 void UdpProc::readPendingDatagrams()
 {
-    while (hasPendingDatagrams())
+    while (hasPendingDatagrams() && (recvCallBack != nullptr))
     {
         QByteArray datagram;
         datagram.resize(pendingDatagramSize());
@@ -19,9 +19,8 @@ void UdpProc::readPendingDatagrams()
 
         readDatagram(datagram.data(), datagram.size(),
                      &sender, &senderPort);
-        if (recvCallBack != nullptr)
-            recvCallBack(RECV_DATA, sender.toString().toStdString().c_str(),
-                         senderPort, datagram.size(), datagram.data());
+        recvCallBack(RECV_DATA, sender.toString().toStdString().c_str(),
+                     senderPort, datagram.size(), datagram.data());
 
     }
 }
