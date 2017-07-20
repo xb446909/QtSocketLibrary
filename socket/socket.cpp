@@ -68,7 +68,7 @@ int InitSocket(int nID, int nType, const char* szIniPath, RecvCallback pCallback
     return 0;
 }
 
-int TCPSend(int nID, const char* szSendBuf, const char* szDstIP, int nDstPort)
+int TCPSend(int nID, const char* szSendBuf, int nlen, const char* szDstIP, int nDstPort)
 {
     pSocketParam socket = FindSocket(nID);
     TcpServer* pServer = nullptr;
@@ -86,7 +86,7 @@ int TCPSend(int nID, const char* szSendBuf, const char* szDstIP, int nDstPort)
             else
             {
                 if (pSocket->state() == QTcpSocket::ConnectedState)
-                    pSocket->write(szSendBuf, strlen(szSendBuf) + 1);
+                    pSocket->write(szSendBuf, nlen);
                 else
                     qDebug() << "Socket is disconnected";
             }

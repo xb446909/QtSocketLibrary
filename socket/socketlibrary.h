@@ -20,7 +20,7 @@ typedef int(*RecvCallback)(int nType, const char* szIP, int nPort, int nSize, co
 typedef int(*fInitSocket)(int nID, int nType, const char* szIniPath, RecvCallback pCallback);
 typedef void(*fUninitSocket)(int nID);
 typedef int(*fTCPConnect)(int nID, int nTimeoutMs);
-typedef int(*fTCPSend)(int nID, const char* szSendBuf, const char* szDstIP, int nDstPort);  //server给指定的client发消息时，
+typedef int(*fTCPSend)(int nID, const char* szSendBuf, int nlen, const char* szDstIP, int nDstPort);  //server给指定的client发消息时，
                                                                                             //client的地址为addr
                                                                                             //client发送给sever时，IP和port为空
 typedef int(*fTCPRecv)(int nID, char* szRecvBuf, int nBufLen, int nTimeoutMs, const char* szDstIP, int nDstPort);
