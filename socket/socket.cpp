@@ -5,7 +5,7 @@
 #include "tcpserver.h"
 #include "udpproc.h"
 #include "tcpclientproc.h"
-#include <sys/time.h>
+#include <time.h>
 
 typedef struct _tagSocketParam
 {
