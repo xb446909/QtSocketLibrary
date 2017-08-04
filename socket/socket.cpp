@@ -62,10 +62,10 @@ int InitSocket(int nID, int nType, const char* szIniPath, RecvCallback pCallback
         break;
     default:
         qDebug() << "Error socket type";
-        return -1;
+        return SOCK_ERROR;
         break;
     }
-    return 0;
+    return SOCK_SUCCESS;
 }
 
 int TCPSend(int nID, const char* szSendBuf, int nlen, const char* szDstIP, int nDstPort)
@@ -75,6 +75,8 @@ int TCPSend(int nID, const char* szSendBuf, int nlen, const char* szDstIP, int n
     QTcpSocket* pSocket = nullptr;
     QAbstractSocket* pSendSocket = nullptr;
 
+    int nRet = SOCK_SUCCESS;
+
     if (socket != nullptr)
     {
         switch (socket->nType) {
@@ -82,19 +84,22 @@ int TCPSend(int nID, const char* szSendBuf, int nlen, const char* szDstIP, int n
             pServer = (TcpServer*)socket->pObj;
             pSocket = pServer->getSocket(szDstIP, nDstPort);
             if (pSocket == nullptr)
-                return -1;
+                nRet = SOCK_ERROR;
             else
             {
                 if (pSocket->state() == QTcpSocket::ConnectedState)
                     pSocket->write(szSendBuf, nlen);
                 else
+                {
                     qDebug() << "Socket is disconnected";
+                    nRet = SOCK_CLOSED;
+                }
             }
             break;
         case TCP_CLIENT:
             pSendSocket = (QAbstractSocket*)socket->pObj;
             if (pSendSocket == nullptr)
-                return -1;
+                nRet = SOCK_ERROR;
             else
             {
                 if (pSendSocket->state() == QAbstractSocket::ConnectedState)
@@ -103,16 +108,19 @@ int TCPSend(int nID, const char* szSendBuf, int nlen, const char* szDstIP, int n
                     pSendSocket->waitForBytesWritten();
                 }
                 else
+                {
                     qDebug() << "Socket is disconnected";
+                    nRet = SOCK_CLOSED;
+                }
             }
             break;
         default:
             qDebug() << "Error socket type";
-            return -1;
+            nRet = SOCK_ERROR;
             break;
         }
     }
-    return 0;
+    return nRet;
 }
 
 int UDPSend(int nID, const char* szSendBuf, const char* szDstIP, int nDstPort)
@@ -121,11 +129,11 @@ int UDPSend(int nID, const char* szSendBuf, const char* szDstIP, int nDstPort)
     if ((socket == nullptr) | (socket->nType != UDP))
     {
         qDebug() << "Error socket type";
-        return -1;
+        return SOCK_ERROR;
     }
     UdpProc* pUdpProc = (UdpProc*)socket->pObj;
     if (pUdpProc == nullptr)
-        return -1;
+        return SOCK_ERROR;
     else
     {
         pUdpProc->writeDatagram(szSendBuf, strlen(szSendBuf) + 1,
@@ -140,7 +148,7 @@ int UDPRecv(int nID, char* szRecvBuf, int nBufLen, int nTimeoutMs, char* szDstIP
     if ((pParam == nullptr) | (pParam->nType != UDP))
     {
         qDebug() << "Error socket type";
-        return -1;
+        return SOCK_ERROR;
     }
     UdpProc* pUdpProc = (UdpProc*)pParam->pObj;
 
@@ -152,7 +160,7 @@ int UDPRecv(int nID, char* szRecvBuf, int nBufLen, int nTimeoutMs, char* szDstIP
         if (endTime - startTime > nTimeoutMs)
         {
             qDebug() << "Receive time out";
-            return -1;
+            return SOCK_TIMEOUT;
         }
     }
 
@@ -184,11 +192,12 @@ pSocketParam FindSocket(int nId)
 
 int TCPConnect(int nID, int nTimeoutMs)
 {
+    int nRet = SOCK_SUCCESS;
     pSocketParam pParam = FindSocket(nID);
     if (pParam->nType != TCP_CLIENT)
     {
         qDebug() << "Error in socket type";
-        return -1;
+        return SOCK_ERROR;
     }
     IniConfig config(pParam->szIniPath);
     QString section = QString().sprintf("TcpClient%d", nID);
@@ -200,8 +209,9 @@ int TCPConnect(int nID, int nTimeoutMs)
     else
     {
         qDebug() << "connect time timeout";
-        return -1;
+        nRet = SOCK_TIMEOUT;
     }
+    return nRet;
 }
 
 int TCPRecv(int nID, char* szRecvBuf, int nBufLen, int nTimeoutMs, const char *szDstIP, int nDstPort)
@@ -221,19 +231,19 @@ int TCPRecv(int nID, char* szRecvBuf, int nBufLen, int nTimeoutMs, const char *s
     if ((pSocket == nullptr) || (pSocket->state() == QTcpSocket::UnconnectedState))
     {
         qDebug() << "can not find the socket or the socket is unconnected";
-        return -1;
+        return SOCK_CLOSED;
     }
     if (pSocket->waitForReadyRead(nTimeoutMs))
     {
         QByteArray bytes = pSocket->readAll();
         int nReadSize = (bytes.size() > nBufLen) ? nBufLen : bytes.size();
         memcpy(szRecvBuf, bytes.data(), nReadSize);
-        return 0;
+        return SOCK_SUCCESS;
     }
     else
     {
         qDebug() << "read time timeout";
-        return -1;
+        return SOCK_TIMEOUT;
     }
 }
 
