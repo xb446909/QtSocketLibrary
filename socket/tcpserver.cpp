@@ -17,7 +17,6 @@ TcpServer::~TcpServer()
 
 void TcpServer::incomingConnection(qintptr socketDescriptor)
 {
-    qDebug() << __FUNCTION__;
     TcpServerProc* proc = new TcpServerProc(socketDescriptor, recvCallback, this);
     procList.append(proc);
 }

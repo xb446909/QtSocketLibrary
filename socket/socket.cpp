@@ -19,10 +19,8 @@ typedef struct _tagSocketParam
     }
 }SocketParam, *pSocketParam;
 
-#ifndef USE_IN_QT_APP
 int _argc = 1;
 QSharedPointer<QCoreApplication> app(new QCoreApplication(_argc, nullptr));
-#endif
 
 QHash<int, QSharedPointer<SocketParam>> g_hashSockets;
 pSocketParam FindSocket(int nId);
@@ -30,7 +28,7 @@ pSocketParam FindSocket(int nId);
 
 int InitSocket(int nID, int nType, const char* szIniPath, RecvCallback pCallback)
 {
-    qDebug() << __FUNCTION__;
+    QCoreApplication::processEvents();      // For create internal event process loop
 
     IniConfig config(szIniPath);
     QString section;
@@ -88,7 +86,10 @@ int TCPSend(int nID, const char* szSendBuf, int nlen, const char* szDstIP, int n
             else
             {
                 if (pSocket->state() == QTcpSocket::ConnectedState)
+                {
                     pSocket->write(szSendBuf, nlen);
+                    pSocket->waitForBytesWritten();
+                }
                 else
                 {
                     qDebug() << "Socket is disconnected";
@@ -104,7 +105,9 @@ int TCPSend(int nID, const char* szSendBuf, int nlen, const char* szDstIP, int n
             {
                 if (pSendSocket->state() == QAbstractSocket::ConnectedState)
                 {
+                    qDebug() << szSendBuf;
                     pSendSocket->write(szSendBuf, strlen(szSendBuf) + 1);
+                    pSendSocket->flush();
                     pSendSocket->waitForBytesWritten();
                 }
                 else
